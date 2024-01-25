@@ -32,7 +32,7 @@ SELECT
     "{{ var("table_prefix") }}_products".tags::jsonb as tags,
     "{{ var("table_prefix") }}_products".purchasable::boolean as purchasable,
     "{{ var("table_prefix") }}_products".regular_price::float as regular_price,
-    "{{ var("table_prefix") }}_products".sale_price::float as sale_price ,
+    "{{ var("table_prefix") }}_products".sale_price as sale_price ,
     "{{ var("table_prefix") }}_products".price::float as price ,
     "{{ var("table_prefix") }}_products".total_sales::float as total_sales,
     "{{ var("table_prefix") }}_products".on_sale::boolean as on_sale ,
@@ -42,8 +42,15 @@ SELECT
     "{{ var("table_prefix") }}_products".virtual::boolean as virtual ,
     "{{ var("table_prefix") }}_products".weight::float as weight ,
     NULL as ean13 ,
-    ("{{ var("table_prefix") }}_products".dimensions->>'height')::float as height ,
-    ("{{ var("table_prefix") }}_products".dimensions->>'width')::float as width ,
+    CASE
+   		WHEN "{{ var("table_prefix") }}_products".dimensions->>'height' = '' THEN NULL
+   		ELSE "{{ var("table_prefix") }}_products".dimensions->>'height'
+	  END AS height,
+
+    CASE
+   	  WHEN "{{ var("table_prefix") }}_products".dimensions->>'width' = '' THEN NULL
+   		ELSE "{{ var("table_prefix") }}_products".dimensions->>'width'
+	  END AS width,
     NULL as location ,
     NULL as manufacturer_name ,
     NULL as unity 
