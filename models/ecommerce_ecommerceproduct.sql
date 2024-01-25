@@ -31,25 +31,35 @@ SELECT
     "{{ var("table_prefix") }}_products".images::jsonb as images,
     "{{ var("table_prefix") }}_products".tags::jsonb as tags,
     "{{ var("table_prefix") }}_products".purchasable::boolean as purchasable,
-    "{{ var("table_prefix") }}_products".regular_price::float as regular_price,
+    CASE
+   		WHEN "_0369668a_products".regular_price = '' THEN NULL::float
+   		ELSE ("_0369668a_products".regular_price)::float
+	  END AS regular_price,
     "{{ var("table_prefix") }}_products".sale_price as sale_price ,
-    "{{ var("table_prefix") }}_products".price::float as price ,
+    CASE
+   		WHEN "_0369668a_products".price = '' THEN NULL::float
+   		ELSE ("_0369668a_products".price)::float
+	  END AS price,
     "{{ var("table_prefix") }}_products".total_sales::float as total_sales,
     "{{ var("table_prefix") }}_products".on_sale::boolean as on_sale ,
     "{{ var("table_prefix") }}_products".average_rating::float as rate ,
     "{{ var("table_prefix") }}_products".slug as slug,
     "{{ var("table_prefix") }}_products".status as status ,
     "{{ var("table_prefix") }}_products".virtual::boolean as virtual ,
-    "{{ var("table_prefix") }}_products".weight::float as weight ,
+    CASE
+   		WHEN "_0369668a_products".weight = '' THEN NULL::float
+   		ELSE ("_0369668a_products".weight )::float
+	  END AS weight ,
     NULL as ean13 ,
+    -- ("{{ var("table_prefix") }}_products".dimensions->>'height')::float as height ,
+    -- ("{{ var("table_prefix") }}_products".dimensions->>'width')::float as width ,
     CASE
-   		WHEN "{{ var("table_prefix") }}_products".dimensions->>'height' = '' THEN NULL
-   		ELSE "{{ var("table_prefix") }}_products".dimensions->>'height'
+   		WHEN "_0369668a_products".dimensions->>'height' = '' THEN NULL::float
+   		ELSE ("_0369668a_products".dimensions->>'height')::float
 	  END AS height,
-
     CASE
-   	  WHEN "{{ var("table_prefix") }}_products".dimensions->>'width' = '' THEN NULL
-   		ELSE "{{ var("table_prefix") }}_products".dimensions->>'width'
+   	  WHEN "_0369668a_products".dimensions->>'width' = '' THEN NULL::float
+   		ELSE ("_0369668a_products".dimensions->>'width')::float
 	  END AS width,
     NULL as location ,
     NULL as manufacturer_name ,
