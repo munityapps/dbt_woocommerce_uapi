@@ -32,7 +32,7 @@ SELECT
     "{{ var("table_prefix") }}_products".tags::jsonb as tags,
     "{{ var("table_prefix") }}_products".purchasable::boolean as purchasable,
     "{{ var("table_prefix") }}_products".regular_price::float as regular_price,
-    "{{ var("table_prefix") }}_products".sale_price as sale_price ,
+    "{{ var("table_prefix") }}_products".sale_price::float as sale_price ,
     "{{ var("table_prefix") }}_products".price::float as price ,
     "{{ var("table_prefix") }}_products".total_sales::float as total_sales,
     "{{ var("table_prefix") }}_products".on_sale::boolean as on_sale ,
