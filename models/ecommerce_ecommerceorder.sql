@@ -3,14 +3,23 @@
     unique_key='id',
     incremental_strategy='delete+insert',
 )}}
-
+WITH order_lines AS (
+  SELECT
+    "{{ var("table_prefix") }}_orders"._airbyte_ab_id AS order_id,
+    jsonb_build_object(
+            'product_id', jsonb_array_elements(line_items) ->> 'product_id',
+            'quantity', jsonb_array_elements(line_items) ->> 'quantity',
+            'name', jsonb_array_elements(line_items) ->> 'name'
+        ) AS product_info
+  FROM "{{ var("table_prefix") }}_orders"
+)
 SELECT 
     NOW() as created,
     NOW() as modified,
     md5(
       '{{ var("integration_id") }}' ||
       "{{ var("table_prefix") }}_orders".id ||
-      'customer' ||
+      'order' ||
       'woocommerce'
     )  as id,
     'woocommerce' as source,
@@ -38,7 +47,10 @@ SELECT
     "{{ var("table_prefix") }}_orders".transaction_id as transaction_id,
     "{{ var("table_prefix") }}_orders".date_paid::date as date_paid,
     "{{ var("table_prefix") }}_orders".date_completed::date as date_completed,
-    "{{ var("table_prefix") }}_orders".line_items::jsonb as lines,
+    (SELECT 
+    jsonb_agg(order_lines.product_info) 
+    from order_lines 
+    where order_lines.order_id = "{{ var("table_prefix") }}_orders"._airbyte_ab_id) AS lines,
     "{{ var("table_prefix") }}_orders".tax_lines::jsonb as tax_lines,
     "{{ var("table_prefix") }}_orders".shipping_lines::jsonb as shipping_lines,
     "{{ var("table_prefix") }}_orders".fee_lines::jsonb as fee_lines,
@@ -51,7 +63,7 @@ SELECT
     NULL::date as invoice_date,
     NULL as delivery_number,
     NULL::date as delivery_date,
-    NULL as valid,
+    NULL::boolean as valid,
     NULL as shipping_number,
     md5(
       '{{ var("integration_id") }}' ||
