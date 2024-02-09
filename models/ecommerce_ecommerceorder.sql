@@ -10,7 +10,7 @@ SELECT
     md5(
       '{{ var("integration_id") }}' ||
       "{{ var("table_prefix") }}_orders".id ||
-      'customer' ||
+      'order' ||
       'woocommerce'
     )  as id,
     'woocommerce' as source,
@@ -51,7 +51,7 @@ SELECT
     NULL::date as invoice_date,
     NULL as delivery_number,
     NULL::date as delivery_date,
-    NULL as valid,
+    NULL::boolean as valid,
     NULL as shipping_number,
     md5(
       '{{ var("integration_id") }}' ||
