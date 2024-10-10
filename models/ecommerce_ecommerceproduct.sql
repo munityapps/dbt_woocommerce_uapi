@@ -4,6 +4,21 @@
     incremental_strategy='delete+insert',
 )}}
 
+WITH variations AS (
+    SELECT 
+        "{{ var("table_prefix") }}_products".id AS product_id,
+        json_agg(json_build_object(
+            'id', "{{ var("table_prefix") }}_product_variations".id,
+            'price', "{{ var("table_prefix") }}_product_variations".price
+        )) AS variation_data
+    FROM "{{ var("table_prefix") }}_product_variations"
+    INNER JOIN "{{ var("table_prefix") }}_products"
+    ON "{{ var("table_prefix") }}_product_variations".id = ANY(
+        SELECT jsonb_array_elements_text("{{ var("table_prefix") }}_products".variations)::int
+    )
+    GROUP BY "{{ var("table_prefix") }}_products".id
+)
+
 SELECT 
     NOW() as created,
     NOW() as modified,
@@ -24,7 +39,7 @@ SELECT
     "{{ var("table_prefix") }}_products".sku as reference,
     "{{ var("table_prefix") }}_products".type as type ,
     "{{ var("table_prefix") }}_products".permalink as url,
-    "{{ var("table_prefix") }}_products".variations::jsonb as variations,
+    variations as variations,
     "{{ var("table_prefix") }}_products".stock_quantity::float as quantity_available ,
     NULL::float as minimal_quantity ,
     "{{ var("table_prefix") }}_products".stock_status as stock_status ,
@@ -67,3 +82,4 @@ SELECT
 FROM "{{ var("table_prefix") }}_products"
 LEFT JOIN _airbyte_raw_{{ var("table_prefix") }}_products
 ON _airbyte_raw_{{ var("table_prefix") }}_products._airbyte_ab_id = "{{ var("table_prefix") }}_products"._airbyte_ab_id
+LEFT JOIN variations ON "{{ var("table_prefix") }}_products".id = variations.product_id
